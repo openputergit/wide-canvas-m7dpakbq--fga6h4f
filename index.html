@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermal Comfort Prediction System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f9ff;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen">
+        <!-- Navigation -->
+        <nav class="gradient-bg text-white p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Green Building Comfort Analysis</h1>
+                <div class="space-x-4">
+                    <a href="#" class="hover:text-green-200">Dashboard</a>
+                    <a href="#" class="hover:text-green-200">Survey</a>
+                    <a href="#" class="hover:text-green-200">Reports</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container mx-auto px-4 py-8">
+            <!-- Survey Form -->
+            <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold mb-6 text-gray-800">Thermal Comfort Survey</h2>
+                <form id="comfortSurvey" class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 mb-2">Temperature (°C)</label>
+                        <input type="number" step="0.1" required class="w-full p-2 border rounded focus:ring focus:ring-green-200" id="temperature">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2">Humidity (%)</label>
+                        <input type="number" step="1" required class="w-full p-2 border rounded focus:ring focus:ring-green-200" id="humidity">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 mb-2">Air Speed (m/s)</label>
+                        <input type="number" step="0.1" required class="w-full p-2 border rounded focus:ring focus:ring-green-200" id="airSpeed">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-2">Clothing Level (clo)</label>
+                        <select class="w-full p-2 border rounded focus:ring focus:ring-green-200" id="clothingLevel">
+                            <option value="0.5">Light summer clothing (0.5 clo)</option>
+                            <option value="1.0">Regular business suit (1.0 clo)</option>
+                            <option value="1.5">Winter business suit (1.5 clo)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 mb-2">Activity Level (met)</label>
+                        <select class="w-full p-2 border rounded focus:ring focus:ring-green-200" id="activityLevel">
+                            <option value="1.0">Resting (1.0 met)</option>
+                            <option value="1.2">Office work (1.2 met)</option>
+                            <option value="1.4">Standing (1.4 met)</option>
+                            <option value="2.0">Walking (2.0 met)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full gradient-bg text-white py-3 px-6 rounded-lg hover:opacity-90 transition-opacity">
+                        Predict Comfort Level
+                    </button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results" class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-6 hidden">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Prediction Results</h3>
+                <div id="predictionResult" class="p-4 rounded-lg text-center"></div>
+                <div class="mt-4 text-sm text-gray-600">
+                    <p>Note: This prediction is based on machine learning analysis of thermal comfort parameters.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('comfortSurvey').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                temperature: parseFloat(document.getElementById('temperature').value),
+                humidity: parseFloat(document.getElementById('humidity').value),
+                airSpeed: parseFloat(document.getElementById('airSpeed').value),
+                clothingLevel: parseFloat(document.getElementById('clothingLevel').value),
+                activityLevel: parseFloat(document.getElementById('activityLevel').value)
+            };
+
+            try {
+                // This is where you would normally make an API call to your ML model
+                // For demonstration, we're using a mockup response
+                // Replace this with actual API call
+                const response = await mockPrediction(formData);
+                
+                // Show results
+                document.getElementById('results').classList.remove('hidden');
+                const resultDiv = document.getElementById('predictionResult');
+                resultDiv.innerHTML = `
+                    <div class="text-lg ${response.comfortable ? 'text-green-600' : 'text-red-600'}">
+                        <i class="bi ${response.comfortable ? 'bi-emoji-smile' : 'bi-emoji-frown'} text-2xl"></i>
+                        <p class="mt-2"><strong>${response.comfortable ? 'Comfortable' : 'Uncomfortable'}</strong></p>
+                        <p class="mt-2 text-sm text-gray-600">${response.message}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while processing your request.');
+            }
+        });
+
+        // Mock prediction function (replace with actual API call)
+        async function mockPrediction(data) {
+            // Simplified comfort logic for demonstration
+            const idealTemp = 23;
+            const idealHumidity = 50;
+            
+            const tempDiff = Math.abs(data.temperature - idealTemp);
+            const humidityDiff = Math.abs(data.humidity - idealHumidity);
+            
+            const comfortable = tempDiff < 3 && humidityDiff < 20 && data.airSpeed < 0.3;
+            
+            return {
+                comfortable: comfortable,
+                message: comfortable 
+                    ? "The conditions are within the comfortable range for most people."
+                    : "The conditions may cause discomfort. Consider adjusting the environmental parameters."
+            };
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
